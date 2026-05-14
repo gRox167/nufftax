@@ -24,12 +24,7 @@ from .kernel import KernelParams, es_kernel, es_kernel_with_derivative
 
 _HAS_PALLAS_GPU = False
 try:
-    from .pallas_spread import (
-        interp_1d_pallas,
-        interp_2d_pallas,
-        spread_1d_pallas,
-        spread_2d_pallas,
-    )
+    from . import pallas_spread as _  # noqa: F401 — check Pallas availability
 
     _HAS_PALLAS_GPU = any(d.platform == "gpu" for d in jax.devices())
 except ImportError:
@@ -678,6 +673,7 @@ def interp_3d_impl(
 def _spread_1d_dispatch(x, c, nf, kernel_params):
     """Dispatch 1D spreading to Pallas GPU or pure JAX (via primitive with transpose)."""
     from .pallas_spread import spread_1d_primitive
+
     if _HAS_PALLAS_GPU and x.ndim > 0 and x.shape[0] >= _PALLAS_MIN_M_SPREAD:
         if c.ndim == 1:
             return spread_1d_primitive(x, c, nf, kernel_params)
@@ -688,6 +684,7 @@ def _spread_1d_dispatch(x, c, nf, kernel_params):
 def _spread_2d_dispatch(x, y, c, nf1, nf2, kernel_params):
     """Dispatch 2D spreading to Pallas GPU or pure JAX (via primitive with transpose)."""
     from .pallas_spread import spread_2d_primitive
+
     if _HAS_PALLAS_GPU and x.ndim > 0 and x.shape[0] >= _PALLAS_MIN_M_SPREAD:
         if c.ndim == 1:
             return spread_2d_primitive(x, y, c, nf1, nf2, kernel_params)
@@ -698,6 +695,7 @@ def _spread_2d_dispatch(x, y, c, nf1, nf2, kernel_params):
 def _interp_1d_dispatch(x, fw, kernel_params):
     """Dispatch 1D interpolation to Pallas GPU or pure JAX (via primitive with transpose)."""
     from .pallas_spread import interp_1d_primitive
+
     if _HAS_PALLAS_GPU and x.ndim > 0 and x.shape[0] >= _PALLAS_MIN_M_INTERP:
         if fw.ndim == 1:
             return interp_1d_primitive(x, fw, kernel_params)
@@ -708,6 +706,7 @@ def _interp_1d_dispatch(x, fw, kernel_params):
 def _interp_2d_dispatch(x, y, fw, kernel_params):
     """Dispatch 2D interpolation to Pallas GPU or pure JAX (via primitive with transpose)."""
     from .pallas_spread import interp_2d_primitive
+
     if _HAS_PALLAS_GPU and x.ndim > 0 and x.shape[0] >= _PALLAS_MIN_M_INTERP:
         if fw.ndim == 2:
             return interp_2d_primitive(x, y, fw, kernel_params)
